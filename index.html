@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="الحياة">
+  <meta name="theme-color" content="#000000">
+  <title>fuck'n الحياة</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.jpeg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ LOADING SCREEN -->
+<div id="loading-screen">
+  <img src="icon.jpeg" alt="" class="loading-icon">
+  <p class="loading-title">fuck'n الحياة</p>
+</div>
+
+<!-- ═══════════════════════════════════════ WELCOME OVERLAY -->
+<div id="welcome-overlay" class="hidden">
+  <div id="welcome-modal">
+    <div class="welcome-steps-wrap">
+
+      <div class="welcome-step active" id="welcome-step-1">
+        <div class="welcome-icon">💰</div>
+        <h2>What's your current balance?</h2>
+        <p class="welcome-sub">The real money you have right now — in USD</p>
+        <div class="input-group">
+          <span class="input-prefix">$</span>
+          <input type="text" id="welcome-balance-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+        </div>
+        <button class="btn-primary" id="btn-welcome-next-1">Next →</button>
+      </div>
+
+      <div class="welcome-step" id="welcome-step-2">
+        <div class="welcome-icon">📅</div>
+        <h2>What's your monthly income?</h2>
+        <p class="welcome-sub">Credited automatically on the 1st of each month</p>
+        <div class="input-group">
+          <span class="input-prefix">$</span>
+          <input type="text" id="welcome-income-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+        </div>
+        <button class="btn-primary" id="btn-welcome-next-2">Next →</button>
+      </div>
+
+      <div class="welcome-step" id="welcome-step-3">
+        <div class="welcome-icon">💱</div>
+        <h2>Exchange rate</h2>
+        <p class="welcome-sub">How many LBP equals 1 USD?</p>
+        <div class="input-group">
+          <span class="input-prefix">ل.ل</span>
+          <input type="text" id="welcome-rate-input" inputmode="numeric" value="89500" autocomplete="off">
+        </div>
+        <p class="welcome-hint">1 USD = <span id="welcome-rate-preview">89,500</span> LBP</p>
+        <button class="btn-primary" id="btn-welcome-finish">Let's go 🚀</button>
+      </div>
+    </div>
+
+    <div class="step-dots">
+      <span class="step-dot active" data-step="1"></span>
+      <span class="step-dot" data-step="2"></span>
+      <span class="step-dot" data-step="3"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ MAIN APP -->
+<div id="app" class="hidden">
+
+  <!-- Month transition banner -->
+  <div id="month-banner" class="hidden">
+    <div class="month-banner-content">
+      <span id="month-banner-text"></span>
+      <button id="btn-month-banner-dismiss">✕</button>
+    </div>
+  </div>
+
+  <!-- SW update banner -->
+  <div id="update-banner" class="hidden">
+    <span>Update available</span>
+    <button id="btn-sw-refresh">Refresh</button>
+  </div>
+
+  <!-- ─── CONTENT AREA ─── -->
+  <div id="content-area">
+
+    <!-- ─── TAB: ADD ─── -->
+    <div id="tab-add" class="tab-content active">
+      <div class="add-top-bar">
+        <span class="app-wordmark">fuck'n الحياة</span>
+        <button id="btn-income-entry" class="btn-income-entry">+ Income</button>
+      </div>
+
+      <div class="amount-section">
+        <div id="usd-mode-area">
+          <div class="amount-display-row">
+            <span class="amount-currency-sym" id="usd-sym">$</span>
+            <input type="text" id="amount-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+          </div>
+        </div>
+
+        <div id="lbp-mode-area" class="hidden">
+          <div class="lbp-display-wrap" id="lbp-display-wrap">
+            <span class="lbp-currency-label">ل.ل</span>
+            <span class="lbp-number" id="lbp-number">0</span>
+          </div>
+          <input id="lbp-capture" type="tel" inputmode="numeric"
+            style="position:fixed;opacity:0.01;width:1px;height:1px;top:0;left:0"
+            autocomplete="off" aria-hidden="true">
+        </div>
+      </div>
+
+      <div class="currency-toggle-row">
+        <button class="curr-btn active" id="btn-usd" data-curr="USD">USD</button>
+        <button class="curr-btn" id="btn-lbp" data-curr="LBP">LBP</button>
+      </div>
+
+      <div class="quick-amounts-row">
+        <button class="quick-btn" data-amount="10">+10</button>
+        <button class="quick-btn" data-amount="20">+20</button>
+        <button class="quick-btn" data-amount="50">+50</button>
+        <button class="quick-btn" data-amount="100">+100</button>
+      </div>
+
+      <div class="category-grid" id="category-grid">
+        <button class="cat-chip" data-cat="food">🍽️<span>Food</span></button>
+        <button class="cat-chip" data-cat="transport">🚗<span>Transport</span></button>
+        <button class="cat-chip" data-cat="bills">💡<span>Bills</span></button>
+        <button class="cat-chip" data-cat="shopping">🛍️<span>Shopping</span></button>
+        <button class="cat-chip" data-cat="health">💊<span>Health</span></button>
+        <button class="cat-chip" data-cat="other">✨<span>Other</span></button>
+      </div>
+
+      <div id="category-budget-status" class="category-status-card hidden">
+        <div class="cat-status-header">
+          <span id="cat-status-label"></span>
+          <span id="cat-status-pct"></span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="category-budget-bar"></div>
+        </div>
+        <p id="category-budget-label" class="cat-status-detail"></p>
+      </div>
+
+      <textarea id="note-input" placeholder="Note (optional)" rows="2" autocomplete="off"></textarea>
+
+      <button id="btn-add-expense" class="btn-primary btn-add" disabled>Add Expense</button>
+    </div><!-- /tab-add -->
+
+    <!-- ─── TAB: TIMELINE ─── -->
+    <div id="tab-timeline" class="tab-content">
+      <div class="tl-header">
+        <h2 class="tab-title">Timeline</h2>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="search" id="search-input" placeholder="Search expenses..." autocomplete="off">
+      </div>
+      <div class="filter-chips-row" id="filter-chips">
+        <button class="filter-chip active" data-filter="all">All</button>
+        <button class="filter-chip" data-filter="food">🍽️ Food</button>
+        <button class="filter-chip" data-filter="transport">🚗 Transport</button>
+        <button class="filter-chip" data-filter="bills">💡 Bills</button>
+        <button class="filter-chip" data-filter="shopping">🛍️ Shopping</button>
+        <button class="filter-chip" data-filter="health">💊 Health</button>
+        <button class="filter-chip" data-filter="other">✨ Other</button>
+        <button class="filter-chip" data-filter="recurring">🔁 Recurring</button>
+      </div>
+      <div id="timeline-list"></div>
+      <div id="timeline-empty" class="empty-state hidden">
+        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="50" stroke="#333" stroke-width="4"/>
+          <path d="M40 60 Q60 40 80 60 Q60 80 40 60Z" fill="#333"/>
+          <circle cx="60" cy="60" r="8" fill="#00E676" opacity="0.6"/>
+        </svg>
+        <p class="empty-title">Nothing here yet</p>
+        <p class="empty-sub">Add your first expense to get started</p>
+      </div>
+    </div><!-- /tab-timeline -->
+
+    <!-- ─── TAB: DASHBOARD ─── -->
+    <div id="tab-dashboard" class="tab-content">
+      <div class="dashboard-scroll">
+
+        <div class="balance-hero-card">
+          <p class="balance-hero-label">Net Balance</p>
+          <button class="balance-hero-amount" id="hero-balance" aria-label="Tap to adjust balance">$0.00</button>
+          <p class="balance-hero-sub">All values in USD · tap to adjust</p>
+        </div>
+
+        <div class="dash-card">
+          <div class="dash-card-row">
+            <div>
+              <p class="dash-card-label">Today's Spending</p>
+              <p class="dash-card-value" id="daily-spent-label">$0.00</p>
+            </div>
+            <div class="dash-divider"></div>
+            <div>
+              <p class="dash-card-label">Daily Limit</p>
+              <p class="dash-card-value" id="daily-limit-label">$0.00</p>
+            </div>
+          </div>
+          <div class="progress-bar-track mt8">
+            <div class="progress-bar-fill" id="daily-progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <p class="dash-card-label">This Month's Spending</p>
+          <p class="dash-card-value large" id="monthly-total-label">$0.00</p>
+        </div>
+
+        <div class="dash-card" id="savings-card">
+          <div class="dash-card-row">
+            <div>
+              <p class="dash-card-label">Saved This Month</p>
+              <p class="dash-card-value" id="savings-actual-label">$0.00</p>
+            </div>
+            <div class="dash-divider"></div>
+            <div>
+              <p class="dash-card-label">Goal Target</p>
+              <p class="dash-card-value" id="savings-target-label">—</p>
+            </div>
+          </div>
+          <div class="progress-bar-track mt8">
+            <div class="progress-bar-fill accent" id="savings-progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <p class="dash-card-label section-label">Category Breakdown</p>
+          <div id="category-bars"></div>
+        </div>
+
+        <div class="dash-card collapsible-card">
+          <button class="collapsible-toggle" id="last-month-toggle">
+            <span>Last Month Summary</span>
+            <span class="collapse-arrow" id="last-month-arrow">▼</span>
+          </button>
+          <div class="collapsible-content hidden" id="last-month-content">
+            <div class="lm-grid">
+              <div class="lm-item"><p class="lm-label">Total Spent</p><p class="lm-value" id="last-month-spent">—</p></div>
+              <div class="lm-item"><p class="lm-label">Income</p><p class="lm-value" id="last-month-income">—</p></div>
+              <div class="lm-item"><p class="lm-label">Net</p><p class="lm-value" id="last-month-net">—</p></div>
+              <div class="lm-item"><p class="lm-label">Top Category</p><p class="lm-value" id="last-month-top-cat">—</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-card">
+          <p class="dash-card-label section-label">Insights</p>
+          <div class="insights-row" id="insights-row">
+            <div class="insight-card" id="insight-top-cat">
+              <p class="insight-label">Top Category</p>
+              <p class="insight-value" id="insight-top-cat-val">—</p>
+            </div>
+            <div class="insight-card" id="insight-weekend">
+              <p class="insight-label">Weekend Spending</p>
+              <p class="insight-value" id="insight-weekend-val">—</p>
+            </div>
+            <div class="insight-card" id="insight-expensive-day">
+              <p class="insight-label">Biggest Day This Week</p>
+              <p class="insight-value" id="insight-expensive-day-val">—</p>
+            </div>
+            <div class="insight-card" id="insight-savings-track">
+              <p class="insight-label">Savings Goal</p>
+              <p class="insight-value" id="insight-savings-track-val">—</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-spacer"></div>
+      </div>
+    </div><!-- /tab-dashboard -->
+
+    <!-- ─── TAB: PLAN ─── -->
+    <div id="tab-plan" class="tab-content">
+      <div class="plan-scroll">
+
+        <h2 class="tab-title-pad">Plan</h2>
+
+        <!-- Savings Goal Section -->
+        <div class="dash-card" id="goal-section">
+          <p class="dash-card-label section-label">Savings Goal</p>
+
+          <div id="goal-empty-state">
+            <p class="empty-plan-text">No goal set yet</p>
+            <button class="btn-outline" id="btn-set-goal">＋ Set a Goal</button>
+          </div>
+
+          <div id="goal-active-state" class="hidden">
+            <div class="goal-display">
+              <div class="goal-name-row">
+                <span class="goal-icon">🎯</span>
+                <div>
+                  <p class="goal-name" id="goal-name-display">My Goal</p>
+                  <p class="goal-target-label">Monthly target: <strong id="goal-target-display">$0</strong></p>
+                </div>
+              </div>
+              <p class="spendable-label">Spendable budget: <strong id="spendable-display">$0</strong></p>
+            </div>
+            <div id="category-limits-display" class="category-limits-list"></div>
+            <div class="goal-actions">
+              <button class="btn-outline small" id="btn-edit-goal">Edit Goal</button>
+              <button class="btn-danger-outline small" id="btn-delete-goal">Delete</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recurring Expenses Section -->
+        <div class="dash-card">
+          <p class="dash-card-label section-label">Recurring Expenses</p>
+          <div id="recurring-list"></div>
+          <div id="recurring-empty" class="empty-plan-text hidden">No recurring expenses</div>
+          <button class="btn-outline" id="btn-add-recurring">＋ Add Recurring</button>
+        </div>
+
+        <div class="bottom-spacer"></div>
+      </div>
+    </div><!-- /tab-plan -->
+
+    <!-- ─── TAB: SETTINGS ─── -->
+    <div id="tab-settings" class="tab-content">
+      <div class="settings-scroll">
+        <h2 class="tab-title-pad">Settings</h2>
+
+        <div class="settings-section">
+          <p class="settings-section-label">Finance</p>
+          <div class="settings-row" id="row-starting-balance">
+            <div>
+              <p class="settings-row-label">Current Balance</p>
+              <p class="settings-row-value" id="setting-balance-val">$0.00</p>
+            </div>
+            <button class="btn-settings-edit" data-action="edit-balance">Edit</button>
+          </div>
+          <div class="settings-row" id="row-monthly-income">
+            <div>
+              <p class="settings-row-label">Monthly Income</p>
+              <p class="settings-row-val-sub" id="setting-income-sub">Takes effect next month</p>
+              <p class="settings-row-value" id="setting-income-val">$0.00</p>
+            </div>
+            <button class="btn-settings-edit" data-action="edit-income">Edit</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <p class="settings-section-label">Exchange Rate</p>
+          <div class="settings-row">
+            <div>
+              <p class="settings-row-label">1 USD =</p>
+              <p class="settings-row-value" id="setting-rate-val">89,500 LBP</p>
+              <p class="settings-row-val-sub" id="setting-rate-updated">Last updated: —</p>
+            </div>
+            <button class="btn-settings-edit" data-action="edit-rate">Edit</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <p class="settings-section-label">Data</p>
+          <button class="btn-settings-action" id="btn-export-csv">Export CSV</button>
+          <button class="btn-settings-action" id="btn-export-json">Export JSON Backup</button>
+          <button class="btn-settings-action" id="btn-import-json">Import JSON Backup</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" aria-hidden="true">
+        </div>
+
+        <div class="settings-section">
+          <p class="settings-note">All values stored and displayed in USD</p>
+          <p class="app-version" id="app-version">v1.0.0</p>
+        </div>
+
+        <div class="bottom-spacer"></div>
+      </div>
+    </div><!-- /tab-settings -->
+
+  </div><!-- /content-area -->
+
+  <!-- ─── BOTTOM NAV ─── -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" id="nav-add" data-tab="add">
+      <span class="nav-icon">＋</span>
+      <span class="nav-label">Add</span>
+    </button>
+    <button class="nav-btn" id="nav-timeline" data-tab="timeline">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Timeline</span>
+    </button>
+    <button class="nav-btn" id="nav-dashboard" data-tab="dashboard">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-btn" id="nav-plan" data-tab="plan">
+      <span class="nav-icon">🎯</span>
+      <span class="nav-label">Plan</span>
+    </button>
+    <button class="nav-btn" id="nav-settings" data-tab="settings">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Settings</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- ═══════════════════════════════════════ MODAL BACKDROP -->
+<div id="modal-backdrop" class="hidden"></div>
+
+<!-- ═══════════════════════════════════════ INCOME MODAL -->
+<div class="modal hidden" id="income-modal">
+  <div class="modal-handle"></div>
+  <h3 class="modal-title">Log Extra Income</h3>
+  <div class="modal-body">
+    <div class="input-group">
+      <span class="input-prefix">$</span>
+      <input type="text" id="income-amount-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+    </div>
+    <input type="text" class="input-standalone" id="income-note-input" placeholder="Note (optional)" autocomplete="off">
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" id="btn-income-cancel">Cancel</button>
+    <button class="btn-primary" id="btn-income-save">Add Income</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ EDIT EXPENSE MODAL -->
+<div class="modal hidden" id="edit-modal">
+  <div class="modal-handle"></div>
+  <h3 class="modal-title">Edit Expense</h3>
+  <div class="modal-body">
+    <div class="currency-toggle-row mb12">
+      <button class="curr-btn active" id="edit-btn-usd" data-curr="USD">USD</button>
+      <button class="curr-btn" id="edit-btn-lbp" data-curr="LBP">LBP</button>
+    </div>
+    <div id="edit-usd-area">
+      <div class="input-group">
+        <span class="input-prefix">$</span>
+        <input type="text" id="edit-amount-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+      </div>
+    </div>
+    <div id="edit-lbp-area" class="hidden">
+      <div class="lbp-display-wrap edit-lbp-wrap" id="edit-lbp-display-wrap">
+        <span class="lbp-currency-label">ل.ل</span>
+        <span class="lbp-number" id="edit-lbp-number">0</span>
+      </div>
+      <input id="edit-lbp-capture" type="tel" inputmode="numeric"
+        style="position:fixed;opacity:0.01;width:1px;height:1px;top:0;left:0"
+        autocomplete="off" aria-hidden="true">
+    </div>
+    <div class="category-grid small-grid" id="edit-category-grid">
+      <button class="cat-chip" data-cat="food">🍽️<span>Food</span></button>
+      <button class="cat-chip" data-cat="transport">🚗<span>Transport</span></button>
+      <button class="cat-chip" data-cat="bills">💡<span>Bills</span></button>
+      <button class="cat-chip" data-cat="shopping">🛍️<span>Shopping</span></button>
+      <button class="cat-chip" data-cat="health">💊<span>Health</span></button>
+      <button class="cat-chip" data-cat="other">✨<span>Other</span></button>
+    </div>
+    <input type="text" class="input-standalone" id="edit-note-input" placeholder="Note (optional)" autocomplete="off">
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" id="btn-edit-cancel">Cancel</button>
+    <button class="btn-primary" id="btn-edit-save">Save</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ BALANCE ADJUST MODAL -->
+<div class="modal hidden" id="adjust-modal">
+  <div class="modal-handle"></div>
+  <h3 class="modal-title">Adjust Balance</h3>
+  <div class="modal-body">
+    <div class="sign-toggle-row">
+      <button class="sign-btn active" id="btn-adjust-plus" data-sign="1">＋ Add</button>
+      <button class="sign-btn" id="btn-adjust-minus" data-sign="-1">− Subtract</button>
+    </div>
+    <div class="input-group">
+      <span class="input-prefix">$</span>
+      <input type="text" id="adjust-amount-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+    </div>
+    <input type="text" class="input-standalone" id="adjust-note-input" placeholder="Reason (optional)" autocomplete="off">
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" id="btn-adjust-cancel">Cancel</button>
+    <button class="btn-primary" id="btn-adjust-save">Apply</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ RECURRING MODAL -->
+<div class="modal hidden" id="recurring-modal">
+  <div class="modal-handle"></div>
+  <h3 class="modal-title" id="recurring-modal-title">Add Recurring Expense</h3>
+  <div class="modal-body">
+    <input type="text" class="input-standalone" id="rec-name-input" placeholder="Name (e.g. Rent)" autocomplete="off">
+    <div class="rec-amount-row">
+      <div class="input-group flex1">
+        <span class="input-prefix" id="rec-amount-sym">$</span>
+        <input type="text" id="rec-amount-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+      </div>
+      <div class="currency-toggle-row compact">
+        <button class="curr-btn active" id="rec-btn-usd" data-curr="USD">USD</button>
+        <button class="curr-btn" id="rec-btn-lbp" data-curr="LBP">LBP</button>
+      </div>
+    </div>
+    <select class="input-select" id="rec-category-select">
+      <option value="food">🍽️ Food</option>
+      <option value="transport">🚗 Transport</option>
+      <option value="bills">💡 Bills</option>
+      <option value="shopping">🛍️ Shopping</option>
+      <option value="health">💊 Health</option>
+      <option value="other">✨ Other</option>
+    </select>
+    <div class="input-group">
+      <span class="input-prefix"># day</span>
+      <input type="number" id="rec-day-input" inputmode="numeric" placeholder="1–28" min="1" max="28" autocomplete="off">
+    </div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" id="btn-rec-cancel">Cancel</button>
+    <button class="btn-primary" id="btn-rec-save">Save</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ GOAL MODAL -->
+<div class="modal hidden" id="goal-modal">
+  <div class="modal-handle"></div>
+  <h3 class="modal-title" id="goal-modal-title">Set Savings Goal</h3>
+  <div class="modal-body">
+    <input type="text" class="input-standalone" id="goal-name-input" placeholder="Goal name (e.g. Emergency Fund)" autocomplete="off">
+    <div class="input-group">
+      <span class="input-prefix">$/mo</span>
+      <input type="text" id="goal-target-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+    </div>
+    <p class="goal-spendable-preview" id="goal-spendable-preview">Spendable budget: $0.00</p>
+
+    <p class="modal-section-label">Category Allocations</p>
+    <div class="goal-cat-inputs">
+      <div class="goal-cat-row"><span class="goal-cat-icon">🍽️</span><label>Food</label>
+        <div class="input-group sm"><span class="input-prefix">$</span><input type="text" class="goal-cat-input" id="goal-food-input" inputmode="decimal" placeholder="0.00"></div></div>
+      <div class="goal-cat-row"><span class="goal-cat-icon">🚗</span><label>Transport</label>
+        <div class="input-group sm"><span class="input-prefix">$</span><input type="text" class="goal-cat-input" id="goal-transport-input" inputmode="decimal" placeholder="0.00"></div></div>
+      <div class="goal-cat-row"><span class="goal-cat-icon">💡</span><label>Bills</label>
+        <div class="input-group sm"><span class="input-prefix">$</span><input type="text" class="goal-cat-input" id="goal-bills-input" inputmode="decimal" placeholder="0.00"></div></div>
+      <div class="goal-cat-row"><span class="goal-cat-icon">🛍️</span><label>Shopping</label>
+        <div class="input-group sm"><span class="input-prefix">$</span><input type="text" class="goal-cat-input" id="goal-shopping-input" inputmode="decimal" placeholder="0.00"></div></div>
+      <div class="goal-cat-row"><span class="goal-cat-icon">💊</span><label>Health</label>
+        <div class="input-group sm"><span class="input-prefix">$</span><input type="text" class="goal-cat-input" id="goal-health-input" inputmode="decimal" placeholder="0.00"></div></div>
+      <div class="goal-cat-row"><span class="goal-cat-icon">✨</span><label>Other</label>
+        <div class="input-group sm"><span class="input-prefix">$</span><input type="text" class="goal-cat-input" id="goal-other-input" inputmode="decimal" placeholder="0.00"></div></div>
+    </div>
+    <div class="goal-alloc-status">
+      <span>Total: <strong id="goal-alloc-total">$0.00</strong></span>
+      <span id="goal-alloc-error" class="alloc-error hidden"></span>
+    </div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" id="btn-goal-cancel">Cancel</button>
+    <button class="btn-primary" id="btn-goal-save" disabled>Confirm</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ SETTINGS EDIT MODAL -->
+<div class="modal hidden" id="settings-edit-modal">
+  <div class="modal-handle"></div>
+  <h3 class="modal-title" id="settings-edit-title">Edit</h3>
+  <div class="modal-body">
+    <div class="input-group">
+      <span class="input-prefix" id="settings-edit-prefix">$</span>
+      <input type="text" id="settings-edit-input" inputmode="decimal" placeholder="0.00" autocomplete="off">
+    </div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" id="btn-settings-edit-cancel">Cancel</button>
+    <button class="btn-primary" id="btn-settings-edit-save">Save</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ CONFIRM MODAL -->
+<div class="modal hidden" id="confirm-modal">
+  <div class="modal-handle"></div>
+  <h3 class="modal-title" id="confirm-title">Are you sure?</h3>
+  <div class="modal-body">
+    <p class="confirm-message" id="confirm-message"></p>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-cancel" id="btn-confirm-no">Cancel</button>
+    <button class="btn-danger" id="btn-confirm-yes">Delete</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
