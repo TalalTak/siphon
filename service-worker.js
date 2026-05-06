@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alhaya-fuckn-v1';
+const CACHE_NAME = 'alhaya-fuckn-v2';
 const CACHE_FILES = [
   './index.html',
   './style.css',

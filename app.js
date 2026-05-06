@@ -336,6 +336,12 @@ function renderTimeline() {
   const empty = document.getElementById('timeline-empty');
   const searchVal = (document.getElementById('search-input').value || '').toLowerCase();
   const activeFilter = document.querySelector('.filter-chip.active')?.dataset.filter || 'all';
+  const dateFrom = document.getElementById('date-from').value;
+  const dateTo   = document.getElementById('date-to').value;
+
+  const clearBtn = document.getElementById('date-range-clear');
+  if (dateFrom || dateTo) clearBtn.classList.remove('hidden');
+  else clearBtn.classList.add('hidden');
 
   let items = getAllTimelineItems();
 
@@ -348,6 +354,14 @@ function renderTimeline() {
     } else {
       items = items.filter(e => e.category === activeFilter || e._type === activeFilter);
     }
+  }
+  if (dateFrom) {
+    const fromTs = new Date(dateFrom).setHours(0,0,0,0);
+    items = items.filter(e => e.timestamp >= fromTs);
+  }
+  if (dateTo) {
+    const toTs = new Date(dateTo).setHours(23,59,59,999);
+    items = items.filter(e => e.timestamp <= toTs);
   }
 
   if (!items.length) {
@@ -1402,12 +1416,28 @@ function wireEvents() {
   document.getElementById('btn-income-save').addEventListener('click', handleSaveIncome);
   document.getElementById('btn-income-cancel').addEventListener('click', () => closeModal('income-modal'));
 
-  /* Timeline search & filter */
+  /* Timeline search, filter & date range */
   document.getElementById('search-input').addEventListener('input', renderTimeline);
+  document.getElementById('date-from').addEventListener('change', renderTimeline);
+  document.getElementById('date-to').addEventListener('change', renderTimeline);
+  document.getElementById('date-range-clear').addEventListener('click', () => {
+    document.getElementById('date-from').value = '';
+    document.getElementById('date-to').value = '';
+    renderTimeline();
+  });
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
+      const isAll = chip.dataset.filter === 'all';
+      if (isAll) {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      } else if (chip.classList.contains('active')) {
+        chip.classList.remove('active');
+        document.querySelector('.filter-chip[data-filter="all"]').classList.add('active');
+      } else {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+      }
       renderTimeline();
     });
   });

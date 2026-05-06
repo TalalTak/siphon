@@ -170,6 +170,18 @@
         <button class="filter-chip" data-filter="other">✨ Other</button>
         <button class="filter-chip" data-filter="recurring">🔁 Recurring</button>
       </div>
+      <div class="date-range-row" id="date-range-row">
+        <div class="date-range-field">
+          <label class="date-range-label">From</label>
+          <input type="date" id="date-from" class="date-range-input">
+        </div>
+        <span class="date-range-sep">—</span>
+        <div class="date-range-field">
+          <label class="date-range-label">To</label>
+          <input type="date" id="date-to" class="date-range-input">
+        </div>
+        <button class="date-range-clear hidden" id="date-range-clear">✕</button>
+      </div>
       <div id="timeline-list"></div>
       <div id="timeline-empty" class="empty-state hidden">
         <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
